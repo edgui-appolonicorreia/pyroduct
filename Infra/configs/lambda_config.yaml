@@ -1,0 +1,13 @@
+# Configuration file for Lambda AWS resource
+
+botocore_configs:
+  retries:
+    max_attempts: 0
+    mode: "standard"
+  read_timeout: 900
+  connect_timeout: 900
+  region_name: "us-east-1"
+
+# lambda_configs:
+
+# layers_configs:

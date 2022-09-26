@@ -1,0 +1,69 @@
+{
+  "v500": [
+    {
+      "SUPPLIERS": {
+          "functions": {
+            "extraction": "testing-airflow",
+            "transformation": "parquet-transformation",
+            "load": "load_redshift"
+          },
+        "upsert_col": "date_time_col",
+        "constraint_conflict": "id"
+        }
+    },
+    {
+      "CUSTOMERS": {
+          "functions": {
+            "extraction": "testing-airflow",
+            "transformation": "parquet-transformation",
+            "load": "load_redshift"
+          },
+        "upsert_col": "date_time_col",
+        "constraint_conflict": "id"
+        }
+    }
+  ],
+  "OTHER_DB": [
+    {
+      "TABLE_C": {
+          "functions": {
+            "extraction": "testing-airflow",
+            "transformation": "common_transformation",
+            "load": "load_redshift"
+          },
+        "upsert_col": "date_time_col"
+        }
+    },
+    {
+      "TABLE_D": {
+          "functions": {
+            "extraction": "testing-airflow",
+            "transformation": "common_transformation",
+            "load": "load_redshift"
+          },
+        "upsert_col": "upsert_test"
+        }
+    }
+  ],
+  "FILIPE_DB": [
+    {
+      "TABLE_C": {
+          "functions": {
+            "extraction": "testing-airflow",
+            "transformation": "common_transformation",
+            "load": "load_redshift"
+          },
+        "upsert_col": "date_time_col"
+        }
+    },
+    {
+      "TABLE_D": {
+          "functions": {
+            "extraction": "testing-airflow",
+            "transformation": "common_transformation"
+          },
+        "upsert_col": "upsert_test"
+        }
+    }
+  ]
+}
