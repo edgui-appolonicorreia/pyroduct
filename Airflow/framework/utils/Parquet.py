@@ -12,7 +12,8 @@ class Parquet:
     # Log configs
     log.basicConfig(format="%(process)d-%(levelname)s-%(message)s", level=log.INFO)
 
-    def check_parquet_file(self, bucket_conn: s3, bucket_name: str, dir: str, parquet_name: str) -> bool:
+    @staticmethod
+    def check_parquet_file(bucket_conn: s3, bucket_name: str, dir: str, parquet_name: str) -> bool:
         """
         Description:
             Return true if file exists and false if not.
@@ -54,7 +55,8 @@ class Parquet:
             # Status reporting the error.
             log.critical(error)
 
-    def s3obj_to_df(self, obj) -> pd.DataFrame:
+    @staticmethod
+    def s3obj_to_df(obj) -> pd.DataFrame:
         """
         Description:
             Convert s3 object (parquet) into parquet.
@@ -75,7 +77,7 @@ class Parquet:
             parquet_file = BytesIO(obj)
 
             # Convert the object into pandas dataframe.
-            dataframe = pd.read_parquet(parquet_file, engine = "pyarrow")
+            dataframe = pd.read_parquet(parquet_file, engine="pyarrow")
 
             # Log message.
             log.info("Object has been converted to dataframe.")
@@ -88,7 +90,8 @@ class Parquet:
             # Status reporting the error.
             log.critical(error)
 
-    def parquet_to_df(self, bucket_conn: s3, bucket_name: str, dir: str, parquet_name: str) -> pd.DataFrame:
+    @staticmethod
+    def parquet_to_df(bucket_conn: s3, bucket_name: str, dir: str, parquet_name: str) -> pd.DataFrame:
         """
         Description:
             Converts parquet into dataframe.
@@ -109,7 +112,7 @@ class Parquet:
             obj = bucket_conn.get_key(key=f"{dir}{parquet_name}", bucket_name=bucket_name)
 
             # Convert the object into pandas dataframe.
-            dataframe = self.s3obj_to_df(obj=obj)
+            dataframe = Parquet.s3obj_to_df(obj=obj)
 
             # Log message.
             log.info("The parquet was converted to dataframe.")
@@ -122,7 +125,8 @@ class Parquet:
             # Status reporting the error.
             log.critical(error)
 
-    def df_to_parquet(self, data: dict, parquet_name: str) -> bool:
+    @staticmethod
+    def df_to_parquet(data: dict, parquet_name: str) -> bool:
         """
         Description:
             Converts dataframe in parquet.
@@ -141,7 +145,7 @@ class Parquet:
             df_final = pd.DataFrame(data)
 
             # Converts dataframe in parquet.
-            df_final.to_parquet(fname = parquet_name, engine = "pyarrow", index = False)
+            df_final.to_parquet(fname=parquet_name, engine="pyarrow", index=False)
 
             # Log message.
             log.info("The dataframe was converted to parquet.")
@@ -153,7 +157,8 @@ class Parquet:
             # Status reporting the error.
             log.critical(error)
 
-    def df_to_parquet_to_s3(self, bucket_conn: s3, bucket_name: str, dir: str, data: dict, parquet_name: str) -> bool:
+    @staticmethod
+    def df_to_parquet_to_s3(bucket_conn: s3, bucket_name: str, dir: str, data: dict, parquet_name: str) -> bool:
         """
         Description:
             Converts dataframe in parquet and saves in S3 bucket.
@@ -171,8 +176,8 @@ class Parquet:
 
         try:
 
-            # Convertes dataframe into parquet.
-            self.df_to_parquet(data = data, parquet_name = parquet_name)
+            # Converts dataframe into parquet.
+            Parquet.df_to_parquet(data=data, parquet_name=parquet_name)
 
             # Saves parquet file in S3 bucket.
             bucket_conn.load_file(
@@ -192,7 +197,8 @@ class Parquet:
             # Status reporting the error.
             log.critical(error)
 
-    def write_on_file(self, bucket_conn: s3, bucket_name: str, dir: str, data: dict, parquet_name: str) -> bool:
+    @staticmethod
+    def write_on_file(bucket_conn: s3, bucket_name: str, dir: str, data: dict, parquet_name: str) -> bool:
         """
         Description:
             Writes records in the parquet file from Bucket S3.
@@ -201,7 +207,7 @@ class Parquet:
             bucket_conn:
             bucket_name: Name of the Bucket in S3.
             dir: Name of the directory in S3 bucket.
-            data: Dict to be use to append records in to Parquet file.
+            data: Dict to be used to append records in to Parquet file.
             parquet_name: Name of the parquet file.
 
         Returns:
@@ -217,7 +223,7 @@ class Parquet:
             dataframe_dict = pd.DataFrame(data)
 
             # Convert the object into pandas dataframe.
-            dataframe = self.s3obj_to_df(obj=obj)
+            dataframe = Parquet.s3obj_to_df(obj=obj)
 
             # List with columns from S3 parquet file.
             df_columns = list(dataframe.columns)

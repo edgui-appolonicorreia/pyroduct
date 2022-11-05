@@ -4,18 +4,17 @@ import pandas as pd
 from datetime import timedelta
 from datetime import datetime as dt
 from Airflow.framework.utils.Parquet import Parquet
+from Airflow.framework.utils.AuxFunctions import DataAmount
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.amazon.aws.hooks import s3
 
-class Bronze:
-    """
-    Description:
-        Class with methods to be used in the raw zone.
-    """
+class Bronze(Parquet, DataAmount):
 
     logging.basicConfig(format="%(process)d-%(levelname)s-%(message)s", level=logging.INFO)
 
-    def __init__(self, bucket_conn: s3, bucket_name: str):
+    def __init__(self, bucket_conn: s3, bucket_name: str, amount_data: str):
+
+        super().__init__()
 
         # Bucket connection
         self.bucket_conn = bucket_conn
@@ -23,17 +22,11 @@ class Bronze:
         # Bucket name
         self.bucket_name = bucket_name
 
-    def get_str_data(self, dir: str) -> list:
-        """
-        Description:
-            Accessing data at the Bronze Layer.
+        # Amount of data -- ONLY 3 OPTIONS AVAILABLE -- [few, medium, huge]
+        self.amount_of_data = DataAmount._amount_of_data(amount_of_data=amount_data)
 
-        Args:
-            dir: Path to directory where there are unprocessed data.
-
-        Returns:
-            A list with dicts, where there are the data.
-        """
+    def get_data(self, dir: str, data_type: str) -> list:
+        """"""
 
         try:
 
@@ -43,32 +36,65 @@ class Bronze:
             # Creating a list to load the file names from the specified directory.
             valid_records = []
 
-            # Getting the files from the dir.
-            for file_name in file_list:
+            if data_type in ["txt", "csv"]:
 
-                # Verifying that the file name is not empty.
-                if file_name != "" or file_name != " " or file_name != (dir + "/"):
+                # Getting the files from the dir.
+                for file_name in file_list:
 
-                    # Parsing the JSON, if not possible put it on a specific list and write as Invalid Record
-                    try:
+                    # Verifying that the file name is not empty.
+                    if file_name != "" or file_name != " " or file_name != (dir + "/"):
 
-                        # Using the Airflow get_key method to get the object
-                        obj = self.bucket_conn.get_key(key=file_name, bucket_name=self.bucket_name)
+                        # Parsing the JSON, if not possible put it on a specific list and write as Invalid Record
+                        try:
 
-                        # The raw data is stored into the 'Body' key, and the next line, access it
-                        file_to_read = obj.get()["Body"].iter_lines()
+                            # Using the Airflow get_key method to get the object
+                            obj = self.bucket_conn.get_key(key=file_name, bucket_name=self.bucket_name)
 
-                        # Iterating through each file
-                        for line in file_to_read:
+                            # The raw data is stored into the 'Body' key, and the next line, access it
+                            file_to_read = obj.get()["Body"].iter_lines()
 
-                            # Appending the line into the valid_records list
-                            valid_records.append(json.loads(line))
+                            # Iterating through each file
+                            for line in file_to_read:
 
-                    except Exception as error:
+                                # Appending the line into the valid_records list
+                                valid_records.append(json.loads(line))
 
-                        logging.error(error)
+                        except Exception as error:
 
-            return valid_records
+                            logging.error(error)
+
+                return valid_records
+
+            elif data_type == "parquet":
+
+                # Getting the files from the dir.
+                for file_name in file_list:
+
+                    # Verifying that the file name is not empty.
+                    if file_name != "" or file_name != " " or file_name != (dir + "/"):
+
+                        # Parsing the JSON, if not possible put it on a specific list and write as Invalid Record
+                        try:
+
+                            # Using the Airflow get_key method to get the object
+                            # obj = self.bucket_conn.get_key(key=file_name, bucket_name=self.bucket_name)
+
+                            pqt_df = Parquet.parquet_to_df(
+                                bucket_conn=self.bucket_conn,
+                                bucket_name=self.bucket_name,
+                                dir=dir,
+                                parquet_name=file_name
+                            )
+
+                        except Exception as error:
+
+                            logging.error(error)
+
+            else:
+
+                logging.critical("")
+
+                raise RuntimeError("")
 
         except Exception as error:
 
@@ -527,5 +553,3 @@ class Golden(Parquet):
             data[i]["apollo-processed-at"] = str(dt.utcnow())
 
         return data
-
-

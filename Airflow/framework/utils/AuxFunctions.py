@@ -1,10 +1,25 @@
 from airflow.models import Variable
 from datetime import datetime, timedelta
 
+class DataAmount:
+
+    @staticmethod
+    def _amount_of_data(amount_of_data: str) -> str:
+        """"""
+
+        # Checking if the 'amount_data' var it's available
+        if amount_of_data in ["few", "medium", "huge"]:
+
+            return amount_of_data
+
+        else:
+
+            raise ValueError(f"Amount of Data invalid! Error value: {amount_of_data}")
+
 class General:
 
     # Defining a datetime format.
-    DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+    DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
     @staticmethod
     def getNextDate(date: datetime, timeInterval: dict, dateFormat: str = DATETIME_FORMAT) -> str:
@@ -18,20 +33,16 @@ class General:
 
         Returns:
             nexDate: It is the base date plus the number of days that have progressed.
-
         """
 
         # Converting the datetime variable to a string format.
-
         nextDate = datetime.strptime(date, dateFormat)
 
         # Converting dictionary values to integer.
-
         for k in timeInterval.keys():
             timeInterval[k] = int(timeInterval[k])
 
         # Adding another day to the current date.
-
         nextDate = nextDate + timedelta(
             days=timeInterval["days"],
             seconds=timeInterval["seconds"],
@@ -54,7 +65,6 @@ class General:
 
         Returns:
             Returns a Boolean value indicating whether the date is less than or equal to the current date.
-
         """
 
         return datetime.strptime(dateTime, General.DATETIME_FORMAT) < datetime.now()

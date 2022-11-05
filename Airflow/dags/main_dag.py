@@ -63,6 +63,21 @@ with DAG(
 
     for schema in oracle_schemas:
 
+        resource_inspect = BranchPythonOperator(
+            task_id="resource_inspect",
+            python_callable=DataInspect.oracle_check_table_data, # TODO: to code the function
+            provide_context=True,
+            depends_on_past=False,
+            trigger_rule="none_failed",
+            op_kwargs={
+                "ts": "{{ ts }}",
+                "schema": schema,
+                "oracle_credentials": oracle_credentials,
+                "oracle_schema_metadata": oracle_metadata[schema],
+                "interval": SCHEDULE_INTERVAL
+            }
+        )
+
         with TaskGroup(group_id=schema) as db_tg:
 
             data_inspect = BranchPythonOperator(

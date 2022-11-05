@@ -7,8 +7,8 @@ class Json:
 
         # Saving data to a JSON file.
 
-        with open(filename, 'w') as f:
-            json.dump(obj = data, fp = f, indent = 4)
+        with open(filename, "w") as f:
+            json.dump(obj=data, fp=f, indent=4)
 
     @staticmethod
     def loadJson(filename: str) -> dict:
@@ -16,14 +16,14 @@ class Json:
         # Loading data from a JSON file.
 
         with open(filename) as data:
-            return json.load(fp = data)
+            return json.load(fp=data)
 
     @staticmethod
     def fromDict(data: dict) -> str:
 
         # Serializing a dictionary.
 
-        return json.dumps(obj = data)
+        return json.dumps(obj=data)
 
     @staticmethod
     def toDict(data: str) -> dict:
